@@ -1,51 +1,104 @@
 'use client';
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState, useCallback, useSyncExternalStore } from 'react';
 import type { Product } from '../lib/mockProducts';
 
+interface CartItem extends Product {
+  quantity: number;
+}
 
-type CartItem = { product: Product; qty: number };
+interface CartContextType {
+  cart: CartItem[];
+  add: (product: Product) => void;
+  remove: (id: string) => void;
+  updateQuantity: (id: string, quantity: number) => void;
+  clear: () => void;
+  total: number;
+  itemCount: number;
+}
 
+const CartContext = createContext<CartContextType | null>(null);
 
-type CartContextType = {
-items: CartItem[];
-add: (p: Product) => void;
-remove: (id: string) => void;
-clear: () => void;
+// Create a store outside React to manage cart state
+let cartStore: CartItem[] = [];
+let listeners: Set<() => void> = new Set();
+
+const notifyListeners = () => {
+  listeners.forEach(listener => listener());
 };
 
+const subscribe = (listener: () => void) => {
+  listeners.add(listener);
+  return () => listeners.delete(listener);
+};
 
-const CartContext = createContext<CartContextType | undefined>(undefined);
+const getSnapshot = () => cartStore;
 
+export const CartProvider = ({ children }: { children: React.ReactNode }) => {
+  const cart = useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
+  const [isClient, setIsClient] = useState(false);
 
-export function CartProvider({ children }: { children: React.ReactNode }) {
-const [items, setItems] = useState<CartItem[]>([]);
+  // Load cart from localStorage on mount
+  useEffect(() => {
+    setIsClient(true);
+    const saved = localStorage.getItem('cart');
+    if (saved) {
+      try {
+        cartStore = JSON.parse(saved);
+        notifyListeners();
+      } catch (e) {
+        console.error('Failed to parse cart from localStorage', e);
+      }
+    }
+  }, []);
 
+  // Save to localStorage when cart changes
+  useEffect(() => {
+    if (isClient && cart.length >= 0) {
+      localStorage.setItem('cart', JSON.stringify(cart));
+    }
+  }, [cart, isClient]);
 
-function add(product: Product) {
-setItems((prev) => {
-const found = prev.find((i) => i.product.id === product.id);
-if (found) return prev.map((i) => (i.product.id === product.id ? { ...i, qty: i.qty + 1 } : i));
-return [...prev, { product, qty: 1 }];
-});
-}
+  const add = useCallback((product: Product) => {
+    const existing = cartStore.find(item => item.id === product.id);
+    if (existing) {
+      cartStore = cartStore.map(item =>
+        item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
+      );
+    } else {
+      cartStore = [...cartStore, { ...product, quantity: 1 }];
+    }
+    notifyListeners();
+  }, []);
 
+  const remove = useCallback((id: string) => {
+    cartStore = cartStore.filter(item => item.id !== id);
+    notifyListeners();
+  }, []);
 
-function remove(id: string) {
-setItems((prev) => prev.filter((i) => i.product.id !== id));
-}
+  const updateQuantity = useCallback((id: string, quantity: number) => {
+    cartStore = cartStore.map(item =>
+      item.id === id ? { ...item, quantity } : item
+    );
+    notifyListeners();
+  }, []);
 
+  const clear = useCallback(() => {
+    cartStore = [];
+    notifyListeners();
+  }, []);
+  
+  const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const itemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
 
-function clear() {
-setItems([]);
-}
+  return (
+    <CartContext.Provider value={{ cart, add, remove, updateQuantity, clear, total, itemCount }}>
+      {children}
+    </CartContext.Provider>
+  );
+};
 
-
-return <CartContext.Provider value={{ items, add, remove, clear }}>{children}</CartContext.Provider>;
-}
-
-
-export function useCart() {
-const ctx = useContext(CartContext);
-if (!ctx) throw new Error('useCart must be used inside CartProvider');
-return ctx;
-}
+export const useCart = () => {
+  const ctx = useContext(CartContext);
+  if (!ctx) throw new Error('useCart must be used inside CartProvider');
+  return ctx;
+};
