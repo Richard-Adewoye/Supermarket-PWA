@@ -15,8 +15,8 @@ export default function ProductCard({ product }: { product: Product }) {
 
   // Debug: log when cart changes
   useEffect(() => {
-    console.log(`Product ${product.id} - Cart:`, cart);
-    console.log(`Product ${product.id} - Quantity:`, quantity);
+    console.log(`Product N{product.id} - Cart:`, cart);
+    console.log(`Product N{product.id} - Quantity:`, quantity);
   }, [cart, quantity, product.id]);
 
   const handleBuyNow = () => {
@@ -74,7 +74,7 @@ export default function ProductCard({ product }: { product: Product }) {
         
         <div className="mt-4 mb-5">
           <span className="text-2xl md:text-3xl font-bold text-gray-900">
-            ${product.price.toFixed(2)}
+            N{product.price.toFixed(2)}
           </span>
         </div>
         

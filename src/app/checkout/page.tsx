@@ -1,11 +1,13 @@
 'use client';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useCart } from '../context/CartContext';
 import OrderSummary from '../components/checkout/OrderSummary';
 import { ShoppingBag, Trash2, X, CheckCircle } from 'lucide-react';
 
 export default function CheckoutPage() {
   const { cart, remove, clear, total } = useCart();
+  const [customerName, setCustomerName] = useState('');
+  const shipping = 0.00; // You can make this dynamic later
 
   // Request notification permission on mount
   useEffect(() => {
@@ -31,8 +33,19 @@ export default function CheckoutPage() {
   const itemsWithQty = cart.map(item => ({ ...item, quantity: item.quantity }));
 
   const handleConfirmOrder = () => {
-    const summary = cart.map(item => `${item.name} x${item.quantity}`).join(', ');
-    const whatsappURL = `https://wa.me/?text=Order: ${encodeURIComponent(summary)}`;
+    if (!customerName.trim()) {
+      alert('Please enter your name before confirming the order');
+      return;
+    }
+
+    // Format the WhatsApp message
+    const items = cart.map(item => 
+      `N{item.name} xN{item.quantity} - NN{(item.price * item.quantity).toFixed(2)}`
+    ).join('\n');
+    
+    const message = `New Order from N{customerName}:\nN{items}\nSubtotal: NN{total.toFixed(2)}\nShipping: NN{shipping.toFixed(2)}\nTotal: NN{(total + shipping).toFixed(2)}\nPlease confirm this order by clicking the send button`;
+    
+    const whatsappURL = `https://wa.me/?text=N{encodeURIComponent(message)}`;
     window.open(whatsappURL, '_blank');
 
     // Send PWA notification if permission granted
@@ -57,6 +70,21 @@ export default function CheckoutPage() {
         <div className="flex flex-col lg:flex-row gap-6">
           {/* Left column: Cart Items */}
           <div className="flex-1 space-y-4">
+            {/* Customer Name Input */}
+            <div className="bg-white rounded-2xl shadow-lg p-6">
+              <h2 className="text-lg font-semibold text-gray-900 mb-4">
+                Customer Information
+              </h2>
+              <input
+                type="text"
+                placeholder="Enter your name"
+                value={customerName}
+                onChange={(e) => setCustomerName(e.target.value)}
+                className="w-full px-4 py-3 text-lg font-medium text-gray-900 placeholder:text-gray-400 bg-gray-50 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:bg-white focus:outline-none transition-all"
+                required
+              />
+            </div>
+
             {/* Cart Items Card */}
             <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
               <div className="bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-4">
@@ -82,7 +110,7 @@ export default function CheckoutPage() {
                             Qty: {item.quantity}
                           </span>
                           <span className="text-gray-400">×</span>
-                          <span className="font-medium">${item.price.toFixed(2)}</span>
+                          <span className="font-medium">N{item.price.toFixed(2)}</span>
                         </div>
                       </div>
 
@@ -90,7 +118,7 @@ export default function CheckoutPage() {
                         <div className="text-right">
                           <p className="text-xs text-gray-500 mb-1">Subtotal</p>
                           <p className="text-xl font-bold text-gray-900">
-                            ${(item.price * item.quantity).toFixed(2)}
+                            N{(item.price * item.quantity).toFixed(2)}
                           </p>
                         </div>
                         
@@ -114,7 +142,7 @@ export default function CheckoutPage() {
                 <div>
                   <p className="text-sm text-gray-600 mb-1">Order Total</p>
                   <p className="text-3xl font-bold text-gray-900">
-                    ${total.toFixed(2)}
+                    N{(total + shipping).toFixed(2)}
                   </p>
                 </div>
                 <button
