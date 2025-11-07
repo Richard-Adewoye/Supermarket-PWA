@@ -7,7 +7,7 @@ import { ShoppingBag, Trash2, X, CheckCircle } from 'lucide-react';
 export default function CheckoutPage() {
   const { cart, remove, clear, total } = useCart();
   const [customerName, setCustomerName] = useState('');
-  const shipping = 0.00; // You can make this dynamic later
+  const shipping = 0.0; // can be made dynamic later
 
   // Request notification permission on mount
   useEffect(() => {
@@ -38,17 +38,22 @@ export default function CheckoutPage() {
       return;
     }
 
-    // Format the WhatsApp message
-    const items = cart.map(item => 
-      `N{item.name} xN{item.quantity} - NN{(item.price * item.quantity).toFixed(2)}`
-    ).join('\n');
-    
-    const message = `New Order from N{customerName}:\nN{items}\nSubtotal: NN{total.toFixed(2)}\nShipping: NN{shipping.toFixed(2)}\nTotal: NN{(total + shipping).toFixed(2)}\nPlease confirm this order by clicking the send button`;
-    
-    const whatsappURL = `https://wa.me/?text=N{encodeURIComponent(message)}`;
+    //Corrected template literals
+    const items = cart
+      .map(item => `${item.name} x${item.quantity} - ₦${(item.price * item.quantity).toFixed(2)}`)
+      .join('\n');
+
+    const message = `New Order from ${customerName}:\n\n${items}\n\nSubtotal: ₦${total.toFixed(
+      2
+    )}\nShipping: ₦${shipping.toFixed(2)}\nTotal: ₦${(total + shipping).toFixed(
+      2
+    )}\n\nPlease confirm this order by clicking the send button.`;
+
+    //encode message properly
+    const whatsappURL = `https://wa.me/?text=${encodeURIComponent(message)}`;
     window.open(whatsappURL, '_blank');
 
-    // Send PWA notification if permission granted
+    // PWA notification
     if ('Notification' in window && Notification.permission === 'granted') {
       new Notification('Order Sent', {
         body: 'Your order summary has been sent to WhatsApp!',
@@ -68,13 +73,11 @@ export default function CheckoutPage() {
         </div>
 
         <div className="flex flex-col lg:flex-row gap-6">
-          {/* Left column: Cart Items */}
+          {/* Left column */}
           <div className="flex-1 space-y-4">
             {/* Customer Name Input */}
             <div className="bg-white rounded-2xl shadow-lg p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">
-                Customer Information
-              </h2>
+              <h2 className="text-lg font-semibold text-gray-900 mb-4">Customer Information</h2>
               <input
                 type="text"
                 placeholder="Enter your name"
@@ -85,7 +88,7 @@ export default function CheckoutPage() {
               />
             </div>
 
-            {/* Cart Items Card */}
+            {/* Cart Items */}
             <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
               <div className="bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-4">
                 <h2 className="text-xl font-semibold text-white flex items-center gap-2">
@@ -95,22 +98,20 @@ export default function CheckoutPage() {
               </div>
 
               <div className="p-6 space-y-4">
-                {cart.map((item, index) => (
+                {cart.map((item) => (
                   <div
                     key={item.id}
                     className="group relative bg-gradient-to-r from-gray-50 to-white border border-gray-200 rounded-xl p-4 hover:shadow-md transition-all duration-300"
                   >
                     <div className="flex items-center justify-between gap-4">
                       <div className="flex-1">
-                        <h3 className="font-semibold text-gray-900 mb-1">
-                          {item.name}
-                        </h3>
+                        <h3 className="font-semibold text-gray-900 mb-1">{item.name}</h3>
                         <div className="flex items-center gap-3 text-sm text-gray-600">
                           <span className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full font-medium">
                             Qty: {item.quantity}
                           </span>
                           <span className="text-gray-400">×</span>
-                          <span className="font-medium">N{item.price.toFixed(2)}</span>
+                          <span className="font-medium">₦{item.price.toFixed(2)}</span>
                         </div>
                       </div>
 
@@ -118,10 +119,10 @@ export default function CheckoutPage() {
                         <div className="text-right">
                           <p className="text-xs text-gray-500 mb-1">Subtotal</p>
                           <p className="text-xl font-bold text-gray-900">
-                            N{(item.price * item.quantity).toFixed(2)}
+                            ₦{(item.price * item.quantity).toFixed(2)}
                           </p>
                         </div>
-                        
+
                         <button
                           onClick={() => remove(item.id)}
                           className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors duration-200 group"
@@ -136,14 +137,12 @@ export default function CheckoutPage() {
               </div>
             </div>
 
-            {/* Total and Actions */}
+            {/* Totals & Actions */}
             <div className="bg-white rounded-2xl shadow-lg p-6">
               <div className="flex items-center justify-between mb-6 pb-6 border-b-2 border-gray-200">
                 <div>
                   <p className="text-sm text-gray-600 mb-1">Order Total</p>
-                  <p className="text-3xl font-bold text-gray-900">
-                    N{(total + shipping).toFixed(2)}
-                  </p>
+                  <p className="text-3xl font-bold text-gray-900">₦{(total + shipping).toFixed(2)}</p>
                 </div>
                 <button
                   onClick={clear}
@@ -161,7 +160,7 @@ export default function CheckoutPage() {
                 <CheckCircle className="w-5 h-5 group-hover:scale-110 transition-transform" />
                 Confirm Order
               </button>
-              
+
               <p className="text-center text-xs text-gray-500 mt-4">
                 Your order will be sent via WhatsApp
               </p>
