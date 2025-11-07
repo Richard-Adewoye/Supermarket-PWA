@@ -56,7 +56,7 @@ export default function AppFooter() {
       </div>
 
       {/* Bottom Bar */}
-      <div className="border-t border-gray-200 bg-gray-100 py-4 text-sm text-gray-600">
+      <div className="border-t border-blue bg-blue py-4 text-sm text-gray-600">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-2 px-4">
           <p>Copyright © 2025 Richard Adewoye. All Rights Reserved.</p>
           <div className="flex gap-4">
