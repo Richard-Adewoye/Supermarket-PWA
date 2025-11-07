@@ -2,7 +2,8 @@
 import React, { createContext, useContext, useEffect, useState, useCallback, useSyncExternalStore } from 'react';
 import type { Product } from '../lib/mockProducts';
 
-interface CartItem extends Product {
+// Make sure CartItem is exported explicitly
+export interface CartItem extends Product {
   quantity: number;
 }
 
@@ -18,7 +19,7 @@ interface CartContextType {
 
 const CartContext = createContext<CartContextType | null>(null);
 
-// Create a store outside React to manage cart state
+// Store outside React to manage cart state
 let cartStore: CartItem[] = [];
 let listeners: Set<() => void> = new Set();
 
