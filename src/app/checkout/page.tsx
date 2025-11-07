@@ -7,12 +7,8 @@ import { ShoppingBag, Trash2, X, CheckCircle } from 'lucide-react';
 export default function CheckoutPage() {
   const { cart, remove, clear, total } = useCart();
 
-  // Request notification permission on mount
-  useEffect(() => {
-    if ('Notification' in window && Notification.permission === 'default') {
-      Notification.requestPermission();
-    }
-  }, []);
+  // Demo customer info
+  const customerName = "Richard"; 
 
   if (cart.length === 0) {
     return (
@@ -31,16 +27,34 @@ export default function CheckoutPage() {
   const itemsWithQty = cart.map(item => ({ ...item, quantity: item.quantity }));
 
   const handleConfirmOrder = () => {
-    const summary = cart.map(item => `${item.name} x${item.quantity}`).join(', ');
-    const whatsappURL = `https://wa.me/?text=Order: ${encodeURIComponent(summary)}`;
+    // Format WhatsApp message like a business DM
+    const itemLines = cart.map(item => `${item.name} x${item.quantity} - $${(item.price*item.quantity).toFixed(2)}`);
+    const summary = `New Order from ${customerName}:\n\n${itemLines.join('\n')}\n\nSubtotal: $${total.toFixed(2)}\nShipping: $0.00\nTotal: $${total.toFixed(2)}\n\nPlease confirm this order.`;
+    
+    const whatsappURL = `https://wa.me/?text=${encodeURIComponent(summary)}`;
     window.open(whatsappURL, '_blank');
 
-    // Send PWA notification if permission granted
-    if ('Notification' in window && Notification.permission === 'granted') {
-      new Notification('Order Sent', {
-        body: 'Your order summary has been sent to WhatsApp!',
-      });
+    // Notify user in PWA
+    if ('Notification' in window) {
+      if (Notification.permission === 'granted') {
+        new Notification('Order Sent', {
+          body: 'Your order summary has been sent to WhatsApp!',
+        });
+      } else if (Notification.permission !== 'denied') {
+        Notification.requestPermission().then(permission => {
+          if (permission === 'granted') {
+            new Notification('Order Sent', {
+              body: 'Your order summary has been sent to WhatsApp!',
+            });
+          } else {
+            console.log('Notification permission denied.');
+          }
+        });
+      }
     }
+
+    // Clear cart after sending
+    clear();
   };
 
   return (
@@ -57,7 +71,6 @@ export default function CheckoutPage() {
         <div className="flex flex-col lg:flex-row gap-6">
           {/* Left column: Cart Items */}
           <div className="flex-1 space-y-4">
-            {/* Cart Items Card */}
             <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
               <div className="bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-4">
                 <h2 className="text-xl font-semibold text-white flex items-center gap-2">
@@ -67,16 +80,14 @@ export default function CheckoutPage() {
               </div>
 
               <div className="p-6 space-y-4">
-                {cart.map((item, index) => (
+                {cart.map((item) => (
                   <div
                     key={item.id}
                     className="group relative bg-gradient-to-r from-gray-50 to-white border border-gray-200 rounded-xl p-4 hover:shadow-md transition-all duration-300"
                   >
                     <div className="flex items-center justify-between gap-4">
                       <div className="flex-1">
-                        <h3 className="font-semibold text-gray-900 mb-1">
-                          {item.name}
-                        </h3>
+                        <h3 className="font-semibold text-gray-900 mb-1">{item.name}</h3>
                         <div className="flex items-center gap-3 text-sm text-gray-600">
                           <span className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full font-medium">
                             Qty: {item.quantity}
@@ -113,9 +124,7 @@ export default function CheckoutPage() {
               <div className="flex items-center justify-between mb-6 pb-6 border-b-2 border-gray-200">
                 <div>
                   <p className="text-sm text-gray-600 mb-1">Order Total</p>
-                  <p className="text-3xl font-bold text-gray-900">
-                    ${total.toFixed(2)}
-                  </p>
+                  <p className="text-3xl font-bold text-gray-900">${total.toFixed(2)}</p>
                 </div>
                 <button
                   onClick={clear}
