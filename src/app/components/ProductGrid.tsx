@@ -7,7 +7,7 @@ export default function ProductGridClient({ initialProducts }: { initialProducts
   const [products, setProducts] = useState(initialProducts);
 
   return (
-    <section className="bg-gray-500 py-8 px-4 md:px-8 rounded-lg">
+    <section className="bg-gradient-to-r from-emerald-400 to-green-600 py-8 px-4 md:px-8 rounded-lg shadow-lg">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {products.map((product) => (
           <ProductCard key={product.id} product={product} />

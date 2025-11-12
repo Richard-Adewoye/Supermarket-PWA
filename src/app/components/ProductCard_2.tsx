@@ -17,39 +17,29 @@ export default function ProductCard({ product }: ProductCardProps) {
 
   const toggleFavorite = () => setIsFavorited((prev) => !prev);
 
-  // Convert Product_2 to cart-compatible format
   const convertToCartProduct = (p: Product_2) => ({
     id: p.id.toString(),
     name: p.name,
     category: p.category || 'Uncategorized',
     categoryTag: p.categoryTag || 'Other',
     price: parseFloat(p.price.replace('$', '')),
-    rating: 4.5, // Default rating
+    rating: 4.5,
     reviewCount: 0,
-    imageUrl: p.imageUrl[0], // Use first image
+    imageUrl: p.imageUrl[0],
   });
 
-  // Find if this product is in cart and get its quantity
   const cartItem = cart.find(item => item.id === product.id.toString());
   const quantity = cartItem?.quantity || 0;
 
   const handleBuyNow = () => {
-    if (quantity === 0) {
-      add(convertToCartProduct(product));
-    }
+    if (quantity === 0) add(convertToCartProduct(product));
     router.push('/checkout');
   };
 
-  const handleIncrement = () => {
-    add(convertToCartProduct(product));
-  };
-
+  const handleIncrement = () => add(convertToCartProduct(product));
   const handleDecrement = () => {
-    if (quantity === 1) {
-      remove(product.id.toString());
-    } else if (quantity > 1) {
-      updateQuantity(product.id.toString(), quantity - 1);
-    }
+    if (quantity === 1) remove(product.id.toString());
+    else if (quantity > 1) updateQuantity(product.id.toString(), quantity - 1);
   };
 
   return (
@@ -57,14 +47,14 @@ export default function ProductCard({ product }: ProductCardProps) {
       {/* Badge + Favorite */}
       <div className="absolute top-3 left-3 z-10">
         {product.isLimited && (
-          <span className="text-xs bg-gradient-to-r from-red-600 to-pink-600 text-white px-3 py-1 rounded-full shadow-lg font-semibold">
+          <span className="text-xs bg-gradient-to-r from-yellow-400 to-orange-400 text-white px-3 py-1 rounded-full shadow-lg font-semibold">
             Limited
           </span>
         )}
       </div>
       <button
         onClick={toggleFavorite}
-        className="absolute top-3 right-3 z-10 text-gray-400 hover:text-red-500 transition-colors p-2 bg-white rounded-full shadow-md hover:shadow-lg"
+        className="absolute top-3 right-3 z-10 text-green-500 hover:text-red-500 transition-colors p-2 bg-white rounded-full shadow-md hover:shadow-lg"
       >
         <Heart fill={isFavorited ? "red" : "none"} strokeWidth={2} size={20} />
       </button>
@@ -117,7 +107,7 @@ export default function ProductCard({ product }: ProductCardProps) {
             
             <button
               onClick={handleIncrement}
-              className="w-10 h-10 flex items-center justify-center rounded-lg bg-white border-2 border-gray-200 text-gray-700 hover:border-green-400 hover:text-green-600 hover:bg-green-50 transition-all duration-200 shadow-sm"
+              className="w-10 h-10 flex items-center justify-center rounded-lg bg-white border-2 border-gray-200 text-green-700 hover:border-green-500 hover:bg-green-50 transition-all duration-200 shadow-sm"
             >
               <Plus size={18} strokeWidth={2.5} />
             </button>
@@ -126,7 +116,7 @@ export default function ProductCard({ product }: ProductCardProps) {
           {/* Buy Now Button */}
           <button
             onClick={handleBuyNow}
-            className="w-full py-3 rounded-lg bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold text-sm md:text-base hover:from-blue-700 hover:to-purple-700 active:scale-[0.98] transition-all duration-200 shadow-md hover:shadow-lg"
+            className="w-full py-3 rounded-lg bg-gradient-to-r from-emerald-400 to-green-600 text-white font-semibold text-sm md:text-base hover:from-emerald-500 hover:to-green-700 active:scale-[0.98] transition-all duration-200 shadow-md hover:shadow-lg"
           >
             Buy Now
           </button>

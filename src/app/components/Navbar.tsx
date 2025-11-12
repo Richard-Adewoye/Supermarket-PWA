@@ -16,12 +16,13 @@ export default function Navbar() {
     { name: 'Store', href: '/' },
     { name: 'Shop', href: '/shop' },
     { name: 'Blog', href: '/blog' },
+    { name: 'Contact Us', href: '/contact-us' },
   ];
 
   return (
-    <nav className="fixed top-4 left-1/2 z-[9999] w-[90%] max-w-6xl -translate-x-1/2 rounded-2xl border border-white/30 bg-gradient-to-r from-gray-900/95 via-gray-800/95 to-gray-900/95 backdrop-blur-xl shadow-2xl px-6 py-3 flex items-center justify-between">
+    <nav className="fixed top-2 left-1/2 z-[9999] w-[90%] max-w-6xl -translate-x-1/2 rounded-2xl border border-emerald-300/30 bg-gradient-to-r from-emerald-500/20 via-green-500/20 to-emerald-500/20 backdrop-blur-xl shadow-2xl px-6 py-3 flex items-center justify-between">
       {/* Logo */}
-      <Link href="/" className="text-2xl font-bold text-white">
+      <Link href="/" className="text-2xl font-bold text-white drop-shadow-lg">
         Supermarket
       </Link>
 
@@ -31,8 +32,10 @@ export default function Navbar() {
           <Link
             key={link.href}
             href={link.href}
-            className={`text-sm font-medium transition-colors duration-200 ${
-              pathname === link.href ? 'text-white font-semibold' : 'text-white/70 hover:text-white'
+            className={`text-sm font-medium transition-colors duration-200 relative ${
+              pathname === link.href 
+                ? 'text-white font-semibold after:absolute after:bottom-[-8px] after:left-0 after:w-full after:h-0.5 after:bg-gradient-to-r after:from-emerald-300 after:to-green-300 after:rounded-full after:shadow-lg' 
+                : 'text-white/80 hover:text-white'
             }`}
           >
             {link.name}
@@ -71,14 +74,14 @@ export default function Navbar() {
 
       {/* Mobile Menu */}
       {isMenuOpen && (
-        <div className="absolute top-full left-0 w-full bg-gray-900/98 backdrop-blur-xl text-white mt-3 rounded-2xl flex flex-col items-center space-y-4 py-4 md:hidden shadow-2xl z-[9999] border border-white/20">
+        <div className="absolute top-full left-0 w-full bg-gradient-to-br from-emerald-500/30 via-green-500/30 to-emerald-500/30 backdrop-blur-xl mt-3 rounded-2xl flex flex-col items-center space-y-4 py-4 md:hidden shadow-2xl z-[9999] border border-emerald-300/30">
           {navLinks.map(link => (
             <Link
               key={link.href}
               href={link.href}
               onClick={() => setIsMenuOpen(false)}
               className={`text-base font-medium transition-colors duration-200 ${
-                pathname === link.href ? 'text-white font-semibold' : 'text-white/70 hover:text-white'
+                pathname === link.href ? 'text-white font-semibold' : 'text-white/80 hover:text-white'
               }`}
             >
               {link.name}

@@ -12,11 +12,10 @@ interface ProductGridContainerProps {
 
 export default function ProductGridContainer({ 
   products, 
-  initialCount = 8 // Default to showing 8 products initially
+  initialCount = 8 
 }: ProductGridContainerProps) {
   const [showAll, setShowAll] = useState(false);
-  
-  // Determine which products to display
+
   const displayedProducts = showAll ? products : products.slice(0, initialCount);
   const hasMore = products.length > initialCount;
 
@@ -34,7 +33,7 @@ export default function ProductGridContainer({
         <div className="flex justify-center">
           <button
             onClick={() => setShowAll(!showAll)}
-            className="group flex items-center gap-2 px-8 py-4 bg-white/10 backdrop-blur-sm hover:bg-white/20 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-white/20"
+            className="group flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-emerald-400 to-green-600 hover:from-emerald-500 hover:to-green-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-green-500"
           >
             {showAll ? (
               <>
