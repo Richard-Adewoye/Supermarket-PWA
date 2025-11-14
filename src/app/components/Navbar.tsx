@@ -80,16 +80,16 @@ export default function Navbar() {
 
       {/* Mobile Menu */}
       {isMenuOpen && (
-        <div className="absolute top-full left-0 w-full bg-black/20 backdrop-blur-xl mt-3 rounded-2xl flex flex-col items-center space-y-4 py-4 md:hidden shadow-[0_8px_32px_0_rgba(0,0,0,0.3)] z-[9999] border border-white/30">
+        <div className="absolute top-full left-0 w-full bg-black/60 backdrop-blur-2xl mt-3 rounded-2xl flex flex-col items-center space-y-4 py-6 md:hidden shadow-[0_8px_32px_0_rgba(0,0,0,0.5)] z-[9999] border border-white/40">
           {navLinks.map(link => (
             <Link
               key={link.href}
               href={link.href}
               onClick={() => setIsMenuOpen(false)}
-              className={`text-base font-medium transition-all duration-200 ${
+              className={`text-lg font-medium transition-all duration-200 ${
                 pathname === link.href 
-                  ? 'text-white font-semibold drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]' 
-                  : 'text-white/90 hover:text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]'
+                  ? 'text-white font-bold drop-shadow-[0_2px_6px_rgba(0,0,0,0.9)]' 
+                  : 'text-white/95 hover:text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]'
               }`}
             >
               {link.name}
