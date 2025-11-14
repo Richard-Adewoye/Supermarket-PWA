@@ -48,7 +48,7 @@ export default function ClientWrapper({ children }: { children: React.ReactNode 
             <div className="relative w-16 h-16 rounded-full p-1 bg-gradient-to-br from-blue-600 via-purple-600 to-pink-600 transition-transform duration-300 group-hover:scale-110 shadow-lg">
               <UserProfileAvatar
                 name="Guest"
-                avatarUrl="/images/profile-avatar.jfif"
+                avatarUrl="/images/avatar-1.webp"
                 size="medium"
               />
             </div>

@@ -105,7 +105,7 @@ export default function ChatInterface({ children, onClose }: ChatInterfaceProps)
         <header className="flex items-center justify-between bg-gradient-to-r from-emerald-400 via-green-500 to-green-600 text-white px-4 py-3">
           <div className="flex items-center gap-3">
             <Image
-              src="/images/profile-avatar.jfif"
+              src="/images/avatar-1.webp"
               alt="Support"
               width={40}
               height={40}
