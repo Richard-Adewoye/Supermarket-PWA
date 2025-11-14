@@ -60,7 +60,7 @@ export default function ContactForm() {
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">Industry</label>
+        <label className="block text-sm font-medium text-gray-700 mb-2">Home Address</label>
         <select
           name="industry"
           value={formData.industry}
@@ -68,9 +68,9 @@ export default function ContactForm() {
           className={inputClasses}
         >
           <option value="">Select...</option>
-          <option value="manufacturing">Manufacturing</option>
-          <option value="agriculture">Agriculture</option>
-          <option value="pharmaceuticals">Pharmaceuticals</option>
+          <option value="manufacturing">Home Address</option>
+          <option value="agriculture">Office Address</option>
+          <option value="pharmaceuticals">Drop-off Location</option>
           <option value="other">Other</option>
         </select>
       </div>

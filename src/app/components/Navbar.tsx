@@ -20,9 +20,9 @@ export default function Navbar() {
   ];
 
   return (
-    <nav className="fixed top-2 left-1/2 z-[9999] w-[90%] max-w-6xl -translate-x-1/2 rounded-2xl border border-emerald-300/30 bg-gradient-to-r from-emerald-500/20 via-green-500/20 to-emerald-500/20 backdrop-blur-xl shadow-2xl px-6 py-3 flex items-center justify-between">
+    <nav className="fixed top-2 left-1/2 z-[9999] w-[90%] max-w-6xl -translate-x-1/2 rounded-2xl border border-white/30 bg-black/20 backdrop-blur-xl shadow-[0_8px_32px_0_rgba(0,0,0,0.3)] px-6 py-3 flex items-center justify-between">
       {/* Logo */}
-      <Link href="/" className="text-2xl font-bold text-white drop-shadow-lg">
+      <Link href="/" className="text-2xl font-bold text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]">
         Supermarket
       </Link>
 
@@ -32,10 +32,10 @@ export default function Navbar() {
           <Link
             key={link.href}
             href={link.href}
-            className={`text-sm font-medium transition-colors duration-200 relative ${
+            className={`text-sm font-medium transition-all duration-200 relative ${
               pathname === link.href 
-                ? 'text-white font-semibold after:absolute after:bottom-[-8px] after:left-0 after:w-full after:h-0.5 after:bg-gradient-to-r after:from-emerald-300 after:to-green-300 after:rounded-full after:shadow-lg' 
-                : 'text-white/80 hover:text-white'
+                ? 'text-white font-semibold drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] after:absolute after:bottom-[-8px] after:left-0 after:w-full after:h-0.5 after:bg-gradient-to-r after:from-emerald-400 after:to-green-400 after:rounded-full after:shadow-lg' 
+                : 'text-white/90 hover:text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]'
             }`}
           >
             {link.name}
@@ -45,13 +45,16 @@ export default function Navbar() {
 
       {/* Icons */}
       <div className="flex items-center space-x-4">
-        <button className="text-white/80 hover:text-white transition-colors" aria-label="Search">
+        <button 
+          className="text-white/90 hover:text-white transition-colors drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]" 
+          aria-label="Search"
+        >
           <Search size={20} />
         </button>
 
         {/* Cart button with live count */}
         <button
-          className="relative text-white/80 hover:text-white transition-colors"
+          className="relative text-white/90 hover:text-white transition-colors drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]"
           onClick={() => router.push('/checkout')}
           aria-label="View cart"
         >
@@ -59,12 +62,15 @@ export default function Navbar() {
           <CartBadge />
         </button>
 
-        <button className="text-white/80 hover:text-white transition-colors" aria-label="User account">
+        <button 
+          className="text-white/90 hover:text-white transition-colors drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]" 
+          aria-label="User account"
+        >
           <User size={20} />
         </button>
 
         <button
-          className="md:hidden text-white/80 hover:text-white transition-colors"
+          className="md:hidden text-white/90 hover:text-white transition-colors drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]"
           onClick={() => setIsMenuOpen(!isMenuOpen)}
           aria-label="Toggle menu"
         >
@@ -74,14 +80,16 @@ export default function Navbar() {
 
       {/* Mobile Menu */}
       {isMenuOpen && (
-        <div className="absolute top-full left-0 w-full bg-gradient-to-br from-emerald-500/30 via-green-500/30 to-emerald-500/30 backdrop-blur-xl mt-3 rounded-2xl flex flex-col items-center space-y-4 py-4 md:hidden shadow-2xl z-[9999] border border-emerald-300/30">
+        <div className="absolute top-full left-0 w-full bg-black/20 backdrop-blur-xl mt-3 rounded-2xl flex flex-col items-center space-y-4 py-4 md:hidden shadow-[0_8px_32px_0_rgba(0,0,0,0.3)] z-[9999] border border-white/30">
           {navLinks.map(link => (
             <Link
               key={link.href}
               href={link.href}
               onClick={() => setIsMenuOpen(false)}
-              className={`text-base font-medium transition-colors duration-200 ${
-                pathname === link.href ? 'text-white font-semibold' : 'text-white/80 hover:text-white'
+              className={`text-base font-medium transition-all duration-200 ${
+                pathname === link.href 
+                  ? 'text-white font-semibold drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]' 
+                  : 'text-white/90 hover:text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]'
               }`}
             >
               {link.name}

@@ -8,11 +8,11 @@ export default function ContactInfo() {
       </p>
 
       <h2 className="text-3xl sm:text-4xl font-bold mb-6 text-white">
-        Discuss Your Chemical Solution Needs
+        Let us know what you want
       </h2>
 
       <p className="text-emerald-100 mb-10 leading-relaxed">
-        Are you looking for top-quality chemical solutions tailored to your needs?
+        Are you looking for the best and most affordable household products?
         Reach out to us.
       </p>
 

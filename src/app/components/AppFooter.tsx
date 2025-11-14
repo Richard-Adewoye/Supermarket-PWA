@@ -31,7 +31,7 @@ export default function AppFooter() {
                 </div>
                 <div className="flex items-center gap-3 text-emerald-200/70 hover:text-white transition-colors">
                   <MapPin className="w-4 h-4" />
-                  <span className="text-sm">Lagos, Nigeria</span>
+                  <span className="text-sm">Ibadan, Nigeria</span>
                 </div>
               </div>
             </div>

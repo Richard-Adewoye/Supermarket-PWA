@@ -1,35 +1,66 @@
-import { NextResponse } from 'next/server';
-import { sendToGroq } from '../../lib/groqClient';
-import { addToCart, removeFromCart, isAvailable, getCart } from '../../lib/cartManager';
+// app/api/chat/route.ts
+import { NextResponse } from "next/server";
+import { sendToGroq, GroqMessage } from "../../lib/groqClient";
+import { mockProducts_2, Product_2 } from "../../lib/mockProducts";
+import { addToCart, removeFromCart, getCart, isAvailable, CartItem } from "../../lib/cartManager";
+
+// Helper to find product by ID or name
+function findProduct(query: string): Product_2 | undefined {
+  return mockProducts_2.find(
+    (p) => p.id.toString() === query || p.name.toLowerCase() === query.toLowerCase()
+  );
+}
 
 export async function POST(req: Request) {
-  const { messages, command } = await req.json();
+  try {
+    const { messages }: { messages?: GroqMessage[] } = await req.json();
 
-  if (command) {
-    let reply = '';
-
-    switch (command.type) {
-      case 'add_to_cart':
-        addToCart({ id: command.productId!, name: command.productName! });
-        reply = `Added to cart. Current cart: ${JSON.stringify(getCart())}`;
-        break;
-      case 'remove_from_cart':
-        removeFromCart(command.productId!);
-        reply = `Removed from cart. Current cart: ${JSON.stringify(getCart())}`;
-        break;
-      case 'check_availability':
-        reply = isAvailable(command.productId!)
-          ? 'Product is available '
-          : 'Product is out of stock ';
-        break;
-      default:
-        reply = 'Command not recognized.';
+    if (!messages) {
+      return NextResponse.json({ error: "No messages provided" }, { status: 400 });
     }
 
-    return NextResponse.json({ reply });
-  }
+    const lastMessage = messages[messages.length - 1]?.content.toLowerCase() || "";
 
-  // Fallback: forward messages to Groq
-  const reply = await sendToGroq(messages);
-  return NextResponse.json({ reply });
+    let cartReply = "";
+
+    // Detect cart commands
+    if (lastMessage.startsWith("add ")) {
+      const productQuery = lastMessage.replace("add ", "").trim();
+      const product = findProduct(productQuery);
+      if (product) {
+        addToCart({ id: product.id.toString(), name: product.name }, 1);
+        cartReply = `✅ Added ${product.name} to your cart!`;
+      } else {
+        cartReply = `❌ Sorry, we couldn't find "${productQuery}".`;
+      }
+    } else if (lastMessage.startsWith("remove ")) {
+      const productQuery = lastMessage.replace("remove ", "").trim();
+      const product = findProduct(productQuery);
+      if (product) {
+        removeFromCart(product.id.toString());
+        cartReply = `🗑️ Removed ${product.name} from your cart.`;
+      } else {
+        cartReply = `❌ Sorry, we couldn't find "${productQuery}" in your cart.`;
+      }
+    } else if (lastMessage.includes("available") || lastMessage.includes("stock")) {
+      const productQuery = lastMessage.replace(/.*available|stock/g, "").trim();
+      const product = findProduct(productQuery);
+      if (product && isAvailable(product.id.toString())) {
+        cartReply = `Yes! ${product.name} is available for ${product.price}.`;
+      } else {
+        cartReply = `Sorry, ${productQuery || "that product"} is not available.`;
+      }
+    }
+
+    // If no cart command, delegate to Groq
+    const groqReply = cartReply || (await sendToGroq(messages, mockProducts_2));
+
+    return NextResponse.json({ reply: groqReply, cart: getCart() });
+  } catch (error) {
+    console.error("API route error:", error);
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : "Unknown error" },
+      { status: 500 }
+    );
+  }
 }

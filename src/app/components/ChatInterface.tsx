@@ -61,8 +61,18 @@ export default function ChatInterface({ children, onClose }: ChatInterfaceProps)
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: updatedMessages }),
+        // Strip timestamp before sending to API - Groq only accepts role and content
+        body: JSON.stringify({ 
+          messages: updatedMessages.map(msg => ({
+            role: msg.role,
+            content: msg.content
+          }))
+        }),
       });
+
+      if (!res.ok) {
+        throw new Error(`API returned ${res.status}`);
+      }
 
       const data = await res.json();
 
@@ -74,7 +84,7 @@ export default function ChatInterface({ children, onClose }: ChatInterfaceProps)
 
       setMessages([...updatedMessages, assistantMessage]);
     } catch (err) {
-      console.error(err);
+      console.error("Chat error:", err);
       const errorMessage: Message = {
         role: 'assistant',
         content: "Sorry — failed to fetch reply.",
@@ -95,15 +105,15 @@ export default function ChatInterface({ children, onClose }: ChatInterfaceProps)
         <header className="flex items-center justify-between bg-gradient-to-r from-emerald-400 via-green-500 to-green-600 text-white px-4 py-3">
           <div className="flex items-center gap-3">
             <Image
-              src="/images/profile-avatar.webp"
+              src="/images/profile-avatar.jfif"
               alt="Support"
               width={40}
               height={40}
               className="rounded-full border-2 border-white"
             />
             <div>
-              <h2 className="font-semibold text-sm">Customer Support</h2>
-              <p className="text-xs text-white/80">Online • Typically replies instantly</p>
+              <h2 className="font-semibold text-sm">AI Support</h2>
+              <p className="text-xs text-white/80">Online • Easily browse products and prices</p>
             </div>
           </div>
           {onClose && (
@@ -163,7 +173,7 @@ export default function ChatInterface({ children, onClose }: ChatInterfaceProps)
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyPress={handleKeyPress}
-            className="flex-1 px-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm bg-gray-50"
+            className="flex-1 px-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm text-gray-900 bg-gray-50 placeholder:text-gray-500"
           />
           <button
             onClick={sendMessage}
