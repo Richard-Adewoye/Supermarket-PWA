@@ -15,18 +15,28 @@ interface Message {
   timestamp: string;
 }
 
-export default function ChatInterface({ children, onClose }: ChatInterfaceProps) {
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      role: 'assistant',
-      content: 'Hello! How can I help you today?',
-      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-    }
-  ]);
+// Move initial message outside component so it persists
+const initialMessages: Message[] = [
+  {
+    role: 'assistant',
+    content: 'Hello! How can I help you today?',
+    timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+  }
+];
 
+// Store messages outside component to persist across mounts
+let persistedMessages: Message[] = initialMessages;
+
+export default function ChatInterface({ children, onClose }: ChatInterfaceProps) {
+  const [messages, setMessages] = useState<Message[]>(persistedMessages);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Update persisted messages whenever messages change
+  useEffect(() => {
+    persistedMessages = messages;
+  }, [messages]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -43,7 +53,13 @@ export default function ChatInterface({ children, onClose }: ChatInterfaceProps)
     }
   };
 
-  async function sendMessage() {
+  async function sendMessage(e?: React.MouseEvent) {
+    // Prevent event bubbling
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    
     if (!input.trim()) return;
 
     const userMessage: Message = {
@@ -118,7 +134,10 @@ export default function ChatInterface({ children, onClose }: ChatInterfaceProps)
           </div>
           {onClose && (
             <button
-              onClick={onClose}
+              onClick={(e) => {
+                e.stopPropagation();
+                onClose();
+              }}
               className="p-1.5 rounded-full hover:bg-white/20 transition-colors"
               aria-label="Close chat"
             >

@@ -14,6 +14,10 @@ export default function ClientWrapper({ children }: { children: React.ReactNode 
     setShowChat(!showChat);
   };
 
+  const handleCloseChat = () => {
+    setShowChat(false);
+  };
+
   return (
     <CartProvider>
       <Navbar />
@@ -23,8 +27,8 @@ export default function ClientWrapper({ children }: { children: React.ReactNode 
       {/* Floating Avatar & Chat Interface */}
       <div className="fixed bottom-0 right-6 z-50 flex flex-col items-end space-y-3 pb-2">
         {showChat && (
-          <div className="mb-3">
-            <ChatInterface>
+          <div className="mb-3" onClick={(e) => e.stopPropagation()}>
+            <ChatInterface onClose={handleCloseChat}>
               <></>
             </ChatInterface>
           </div>
