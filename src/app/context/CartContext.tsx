@@ -1,9 +1,15 @@
 'use client';
 import React, { createContext, useContext, useEffect, useState, useCallback, useSyncExternalStore } from 'react';
 import type { Product } from '../lib/mockProducts';
+import { mockProducts_2 } from '../lib/mockProducts';
 
-// Make sure CartItem is exported explicitly
 export interface CartItem extends Product {
+  quantity: number;
+}
+
+interface APICartItem {
+  id: string;
+  name: string;
   quantity: number;
 }
 
@@ -15,11 +21,11 @@ interface CartContextType {
   clear: () => void;
   total: number;
   itemCount: number;
+  updateCartFromAPI: (apiCart: APICartItem[]) => void;
 }
 
 const CartContext = createContext<CartContextType | null>(null);
 
-// Store outside React to manage cart state
 let cartStore: CartItem[] = [];
 let listeners: Set<() => void> = new Set();
 
@@ -38,7 +44,6 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
   const cart = useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
   const [isClient, setIsClient] = useState(false);
 
-  // Load cart from localStorage on mount
   useEffect(() => {
     setIsClient(true);
     const saved = localStorage.getItem('cart');
@@ -47,12 +52,11 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
         cartStore = JSON.parse(saved);
         notifyListeners();
       } catch (e) {
-        console.error('Failed to parse cart from localStorage', e);
+        console.error('Failed to parse cart', e);
       }
     }
   }, []);
 
-  // Save to localStorage when cart changes
   useEffect(() => {
     if (isClient && cart.length >= 0) {
       localStorage.setItem('cart', JSON.stringify(cart));
@@ -77,22 +81,70 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   const updateQuantity = useCallback((id: string, quantity: number) => {
-    cartStore = cartStore.map(item =>
-      item.id === id ? { ...item, quantity } : item
-    );
-    notifyListeners();
+    if (quantity <= 0) {
+      remove(id);
+    } else {
+      cartStore = cartStore.map(item =>
+        item.id === id ? { ...item, quantity } : item
+      );
+      notifyListeners();
+    }
   }, []);
 
   const clear = useCallback(() => {
     cartStore = [];
     notifyListeners();
   }, []);
+
+  const updateCartFromAPI = useCallback((apiCart: APICartItem[]) => {
+    console.log('📥 Updating cart from API:', apiCart);
+    
+    if (!apiCart || apiCart.length === 0) {
+      return;
+    }
+
+    const updatedCart: CartItem[] = [];
+
+    for (const apiItem of apiCart) {
+      const product = mockProducts_2.find(p => p.id.toString() === apiItem.id);
+      
+      if (product) {
+        const existingItem = cartStore.find(item => item.id === product.id.toString());
+        
+        if (existingItem) {
+          updatedCart.push({ ...existingItem, quantity: apiItem.quantity });
+        } else {
+          updatedCart.push({
+            id: product.id.toString(),
+            name: product.name,
+            category: product.category || 'General',
+            categoryTag: product.categoryTag || 'Other',
+            price: parseFloat(product.price.replace('₦', '').replace(',', '')),
+            rating: 4.5,
+            reviewCount: 0,
+            imageUrl: product.imageUrl[0] || '/images/placeholder.jpg',
+            quantity: apiItem.quantity
+          });
+        }
+      }
+    }
+
+    const apiItemIds = apiCart.map(item => item.id);
+    const existingItems = cartStore.filter(item => !apiItemIds.includes(item.id));
+    
+    cartStore = [...existingItems, ...updatedCart];
+    notifyListeners();
+    
+    console.log('✅ Cart updated successfully:', cartStore);
+  }, []);
   
   const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const itemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
 
   return (
-    <CartContext.Provider value={{ cart, add, remove, updateQuantity, clear, total, itemCount }}>
+    <CartContext.Provider value={{ 
+      cart, add, remove, updateQuantity, clear, total, itemCount, updateCartFromAPI 
+    }}>
       {children}
     </CartContext.Provider>
   );

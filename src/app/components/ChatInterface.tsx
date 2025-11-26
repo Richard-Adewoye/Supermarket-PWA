@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import Image from 'next/image';
 import { X, Send } from 'lucide-react';
+import { useCart } from '../context/CartContext';
 
 interface ChatInterfaceProps {
   children?: React.ReactNode;
@@ -28,6 +29,7 @@ const initialMessages: Message[] = [
 let persistedMessages: Message[] = initialMessages;
 
 export default function ChatInterface({ children, onClose }: ChatInterfaceProps) {
+  const { updateCartFromAPI } = useCart();
   const [messages, setMessages] = useState<Message[]>(persistedMessages);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -74,6 +76,8 @@ export default function ChatInterface({ children, onClose }: ChatInterfaceProps)
     setIsLoading(true);
 
     try {
+      console.log('📤 Sending message to API:', input);
+      
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -85,22 +89,36 @@ export default function ChatInterface({ children, onClose }: ChatInterfaceProps)
           }))
         }),
       });
+      
 
       if (!res.ok) {
+        console.error('❌ API returned error status:', res.status);
         throw new Error(`API returned ${res.status}`);
       }
 
-      const data = await res.json();
+      const data: { reply?: string; cart?: any } = await res.json();
+
+      console.log('📥 API Response received:', data);
+      console.log('🛒 Cart from API:', data.cart);
+
+      if (data.cart) {
+        console.log('🔄 Calling updateCartFromAPI with:', data.cart);
+        console.log('📊 Cart has', data.cart.length, 'items');
+        updateCartFromAPI(data.cart);
+        console.log('✅ updateCartFromAPI completed');
+      } else {
+        console.warn('⚠️ No cart data in API response');
+      }
 
       const assistantMessage: Message = {
         role: 'assistant',
         content: data.reply || "Sorry — failed to fetch reply.",
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       };
-
+      
       setMessages([...updatedMessages, assistantMessage]);
     } catch (err) {
-      console.error("Chat error:", err);
+      console.error("💥 Error in sendMessage:", err);
       const errorMessage: Message = {
         role: 'assistant',
         content: "Sorry — failed to fetch reply.",
@@ -110,7 +128,7 @@ export default function ChatInterface({ children, onClose }: ChatInterfaceProps)
     } finally {
       setIsLoading(false);
     }
-  }
+  } 
 
   return (
     <>
